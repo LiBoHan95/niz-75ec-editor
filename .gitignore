@@ -1,0 +1,4 @@
+node_modules/
+.bridge.pid
+.DS_Store
+*.log

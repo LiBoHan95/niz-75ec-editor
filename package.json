@@ -1,0 +1,13 @@
+{
+  "name": "niz-75ec-editor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "75EC 改键台：本地桥接 + 网页改键",
+  "scripts": {
+    "start": "node bridge.mjs --open"
+  },
+  "dependencies": {
+    "node-hid": "^3.4.0"
+  }
+}

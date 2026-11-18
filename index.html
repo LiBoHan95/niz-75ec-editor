@@ -1,0 +1,2426 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>75EC 改键台 · NIZ</title>
+<style>
+  :root {
+    --bg: #eef2f4;
+    --grid: rgba(22, 40, 52, 0.035);
+    --surface: #fbfcfd;
+    --surface-2: #e7edf0;
+    --surface-3: #dce5ea;
+    --ink: #15212a;
+    --ink-2: #3f4f5b;
+    --muted: #687883;
+    --faint: #98a6b0;
+    --line: #d3dde3;
+    --line-2: #b8c6cf;
+    --accent: #2e6f8e;
+    --accent-2: #dcebf2;
+    --accent-3: #7fb9d0;
+    --ok: #2f6f52;
+    --danger: #a34b44;
+    --danger-2: #f4e5e3;
+    --deck: #171d22;
+    --deck-2: #0f1418;
+    --cap-ink: #e9eff3;
+    --cap-muted: #8c9aa5;
+    --shadow: 0 26px 60px -34px rgba(20, 32, 42, 0.55);
+    --radius: 16px;
+    --u: 58px;
+    --gap: 3.4px;
+    --font-ui: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --font-mono: "SF Mono", "Menlo", "Monaco", monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--font-ui);
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+      var(--bg);
+    background-size: 28px 28px;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(1100px 520px at 50% -12%, rgba(255,255,255,.75), transparent 62%);
+  }
+  button, input { font: inherit; }
+  button { color: inherit; }
+  .hidden { display: none !important; }
+
+  .app {
+    position: relative;
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 22px 28px 30px;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 4px 0 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
+  .brand-mark {
+    width: 42px; height: 42px; flex: 0 0 auto;
+    display: grid; place-items: center;
+    border-radius: 10px;
+    background: linear-gradient(160deg, #1f2d37, #101820);
+    color: #fff;
+    font: 600 11px var(--font-mono);
+    letter-spacing: .1em;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 8px 18px -12px rgba(0,0,0,.7);
+  }
+  .brand h1 {
+    margin: 2px 0 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -.015em;
+    line-height: 1.15;
+  }
+  .brand h1 span { color: var(--muted); font-weight: 500; }
+  .eyebrow {
+    font: 500 9px/1.25 var(--font-mono);
+    letter-spacing: .17em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .nameplate {
+    margin-left: auto;
+    flex: 0 0 auto;
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, #fff, #eaf0f3);
+    box-shadow: inset 0 1px 0 #fff, 0 2px 4px rgba(20,32,42,.04);
+    font-family: var(--font-mono);
+  }
+  .plate-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 10px; letter-spacing: .04em; color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .plate-brand {
+    font-weight: 700; letter-spacing: .12em; color: var(--ink);
+  }
+  .plate-sub { margin-top: 3px; color: var(--muted); font-size: 8.5px; letter-spacing: .1em; }
+  .plate-sep { color: var(--faint); }
+
+  .top-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+  .conn-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 34px; padding: 0 10px 0 12px;
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 11px;
+    color: var(--ink-2);
+  }
+  .led {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #9aa8b2;
+    box-shadow: 0 0 0 3px rgba(154,168,178,.12);
+    flex: 0 0 auto;
+  }
+  .led.on {
+    background: #378c66;
+    box-shadow: 0 0 0 3px rgba(55,140,102,.14), 0 0 10px rgba(55,140,102,.45);
+  }
+  .led.demo { background: var(--accent); box-shadow: 0 0 0 3px rgba(46,111,142,.12); }
+  .link {
+    border: 0; background: transparent; padding: 2px 0;
+    font-size: 10px; color: var(--muted); cursor: pointer;
+    border-bottom: 1px solid transparent;
+  }
+  .link:hover { color: var(--ink); border-bottom-color: var(--line-2); }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    height: 34px; padding: 0 12px;
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--ink-2);
+    font-size: 11px; font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .14s ease, border-color .14s ease, color .14s ease, transform .1s ease;
+  }
+  .btn:hover { background: #f1f6f8; border-color: #a9bac4; color: var(--ink); }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: .42; cursor: not-allowed; transform: none; }
+  .btn-primary {
+    background: linear-gradient(180deg, #223440, #16232d);
+    border-color: #101a21;
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 3px 8px -4px rgba(10,20,28,.55);
+  }
+  .btn-primary:hover { background: linear-gradient(180deg, #2a3f4d, #1a2933); color: #fff; border-color: #0d161c; }
+  .btn-accent {
+    background: var(--accent); border-color: #275f79; color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
+  }
+  .btn-accent:hover { background: #347c9d; border-color: #275f79; }
+  .btn-small { height: 28px; padding: 0 9px; font-size: 10px; }
+  .btn svg { width: 14px; height: 14px; flex: 0 0 auto; }
+  .icon-btn {
+    width: 30px; height: 30px;
+    display: grid; place-items: center;
+    border: 1px solid transparent; border-radius: 7px;
+    background: transparent; color: var(--muted); cursor: pointer;
+  }
+  .icon-btn:hover { border-color: var(--line); background: var(--surface); color: var(--ink); }
+  .icon-btn svg { width: 15px; height: 15px; }
+
+  /* ---------- notices ---------- */
+  .notice {
+    display: flex; align-items: flex-start; gap: 12px;
+    margin: 14px 0 0;
+    padding: 10px 12px;
+    border: 1px solid #b9d2de;
+    border-radius: 9px;
+    background: #f0f7fa;
+    color: #23536a;
+    font-size: 11.5px; line-height: 1.5;
+  }
+  .notice.error { border-color: #e2c3bf; background: var(--danger-2); color: #7d3732; }
+  .notice-text { flex: 1; }
+  .notice-close {
+    border: 0; background: transparent; color: currentColor;
+    font-size: 16px; line-height: 1; cursor: pointer; opacity: .55;
+    padding: 0 2px;
+  }
+  .notice-close:hover { opacity: 1; }
+
+  /* ---------- workspace ---------- */
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 372px;
+    gap: 22px;
+    align-items: start;
+    padding-top: 22px;
+  }
+  .stage, .inspector {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 1px 0 rgba(255,255,255,.8);
+  }
+  .stage { padding: 18px; min-width: 0; }
+  .inspector { padding: 20px; position: sticky; top: 18px; }
+
+  .stage-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; padding: 1px 2px 15px;
+  }
+  .segmented {
+    display: inline-flex; gap: 2px;
+    padding: 3px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+  }
+  .segmented button {
+    border: 0; background: transparent;
+    padding: 6px 14px; border-radius: 6px;
+    font-size: 11.5px; font-weight: 500; color: var(--muted);
+    cursor: pointer; white-space: nowrap;
+  }
+  .segmented button:hover { color: var(--ink); }
+  .segmented button.active {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 3px rgba(20,32,42,.14), inset 0 0 0 1px rgba(255,255,255,.7);
+  }
+  .segmented button:disabled { opacity: .45; cursor: default; }
+
+  .readout {
+    display: flex; align-items: center; gap: 8px;
+    font: 10.5px var(--font-mono);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .readout b { color: var(--ink-2); font-weight: 500; }
+  .progress {
+    position: relative;
+    height: 3px; margin: -5px 2px 13px;
+    background: var(--surface-2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress > i {
+    display: block; height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-3));
+    border-radius: inherit;
+    transition: width .2s ease;
+  }
+  .progress.indeterminate > i {
+    width: 35%;
+    animation: slide 1.1s ease-in-out infinite;
+  }
+  @keyframes slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+  }
+
+  /* ---------- keyboard deck ---------- */
+  .deck-viewport { overflow-x: auto; padding-bottom: 2px; }
+  .deck-shell {
+    position: relative;
+    min-width: 700px;
+    padding: 16px;
+    border: 1px solid #080c0f;
+    border-radius: 18px;
+    background:
+      radial-gradient(700px 220px at 50% -30%, rgba(255,255,255,.10), transparent 70%),
+      linear-gradient(180deg, #232c33 0%, #1a2127 36%, #12181d 100%);
+    box-shadow:
+      var(--shadow),
+      inset 0 1px 0 rgba(255,255,255,.12),
+      inset 0 -1px 0 rgba(0,0,0,.6);
+  }
+  .deck-shell::after {
+    content: "";
+    position: absolute; inset: 5px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.035);
+    pointer-events: none;
+  }
+  .deck-plate {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 10px;
+    border-radius: 10px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.025), rgba(0,0,0,.10)),
+      #141a1f;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 22px rgba(0,0,0,.38);
+  }
+  .deck-rows {
+    display: flex; flex-direction: column;
+    gap: calc(var(--u) * 0.07);
+  }
+  .deck-row { display: flex; gap: var(--gap); }
+  .deck-row.fill .key { flex: 1 1 0; }
+
+  .key {
+    --w: 1;
+    position: relative;
+    flex: 0 0 calc(var(--w) * var(--u) + (var(--w) - 1) * var(--gap));
+    height: calc(var(--u) * 0.84);
+    display: flex; flex-direction: column;
+    justify-content: space-between; align-items: flex-start;
+    padding: calc(var(--u) * 0.10) calc(var(--u) * 0.11);
+    border: 1px solid #0a0f12;
+    border-radius: calc(var(--u) * 0.09);
+    background:
+      linear-gradient(180deg, #39434b 0%, #2f383f 38%, #262e34 100%);
+    box-shadow:
+      0 2px 0 #0a0e11,
+      0 3px 5px rgba(0,0,0,.30),
+      inset 0 1px 0 rgba(255,255,255,.10);
+    color: var(--cap-ink);
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .key:hover {
+    transform: translateY(-1px);
+    border-color: #52616c;
+    box-shadow:
+      0 3px 0 #0a0e11,
+      0 7px 12px rgba(0,0,0,.34),
+      inset 0 1px 0 rgba(255,255,255,.14);
+  }
+  .key:active { transform: translateY(1px); }
+  .key:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+  .key.selected {
+    border-color: var(--accent-3);
+    background:
+      linear-gradient(180deg, #3c4a54 0%, #303b44 40%, #27323a 100%);
+    box-shadow:
+      0 0 0 2px rgba(127,185,208,.22),
+      0 2px 0 #0a0e11,
+      0 4px 12px rgba(0,0,0,.34),
+      inset 0 1px 0 rgba(255,255,255,.16);
+  }
+  .key.changed::after {
+    content: "";
+    position: absolute; top: 5px; right: 5px;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent-3);
+    box-shadow: 0 0 6px rgba(127,185,208,.75);
+  }
+  .key .phys {
+    display: block;
+    max-width: 100%;
+    font: 500 clamp(6px, calc(var(--u) * 0.13), 8px)/1 var(--font-mono);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--cap-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .key .assign {
+    display: block;
+    max-width: 100%;
+    font: 500 clamp(7px, calc(var(--u) * 0.19), 11.5px)/1.1 var(--font-ui);
+    letter-spacing: .005em;
+    color: var(--cap-ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .key .assign.sym { font-size: clamp(9px, calc(var(--u) * 0.22), 13px); }
+  .key .assign.long { font-size: clamp(6.5px, calc(var(--u) * 0.145), 9px); letter-spacing: -.01em; }
+  .key .assign.none { color: #72808a; }
+  .key .assign.mono { font-family: var(--font-mono); }
+
+  .deck-overlay {
+    position: absolute; inset: 0;
+    z-index: 3;
+    display: grid; place-items: center;
+    border-radius: 18px;
+    background: rgba(10, 15, 19, .58);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+  .overlay-card {
+    width: min(360px, calc(100% - 40px));
+    padding: 22px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 13px;
+    background: rgba(250, 252, 253, .97);
+    box-shadow: 0 22px 50px -18px rgba(0,0,0,.6);
+    text-align: center;
+  }
+  .overlay-icon {
+    width: 42px; height: 42px; margin: 0 auto 10px;
+    display: grid; place-items: center;
+    border-radius: 10px;
+    background: var(--accent-2);
+    color: var(--accent);
+  }
+  .overlay-icon svg { width: 20px; height: 20px; }
+  .overlay-card h3 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
+  .overlay-card p { margin: 0 0 16px; color: var(--muted); font-size: 11.5px; line-height: 1.6; }
+  .overlay-card .btn { height: 36px; padding: 0 16px; }
+
+  /* ---------- stage foot ---------- */
+  .stage-foot {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    padding: 14px 2px 2px;
+  }
+  .change-summary {
+    display: flex; align-items: center; gap: 7px;
+    min-height: 20px;
+    font: 10.5px var(--font-mono);
+    color: var(--muted);
+  }
+  .change-summary .dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent-3);
+    box-shadow: 0 0 6px rgba(127,185,208,.7);
+  }
+  .change-summary strong { color: var(--accent); font-weight: 600; }
+  .toolbar { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+
+  .log {
+    margin: 12px 2px 0;
+    border-top: 1px solid var(--line);
+    padding-top: 9px;
+  }
+  .log summary {
+    cursor: pointer;
+    font: 9.5px var(--font-mono);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    user-select: none;
+  }
+  .log summary:hover { color: var(--muted); }
+  .log-lines {
+    margin-top: 8px;
+    max-height: 108px; overflow: auto;
+    font: 10px/1.6 var(--font-mono);
+    color: var(--muted);
+  }
+  .log-line { display: flex; gap: 9px; }
+  .log-line time { color: var(--faint); flex: 0 0 auto; }
+  .log-line.error { color: var(--danger); }
+
+  /* ---------- inspector ---------- */
+  .inspector-empty { padding: 4px 2px 8px; }
+  .inspector-empty .icon-wrap {
+    width: 46px; height: 46px;
+    display: grid; place-items: center;
+    margin-bottom: 14px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: linear-gradient(180deg, #fff, #eef3f6);
+    color: var(--accent);
+  }
+  .inspector-empty .icon-wrap svg { width: 21px; height: 21px; }
+  .inspector-empty h2 { margin: 0 0 7px; font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+  .inspector-empty p { margin: 0 0 18px; color: var(--muted); font-size: 11.5px; line-height: 1.65; }
+  .steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+  .steps li { display: flex; gap: 10px; align-items: baseline; font-size: 11px; color: var(--ink-2); }
+  .steps span {
+    flex: 0 0 auto;
+    font: 9px var(--font-mono); color: var(--accent);
+    border: 1px solid #c8dfe9; background: #f2f9fc;
+    border-radius: 4px; padding: 2px 4px;
+  }
+
+  .key-head { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; }
+  .key-badge {
+    width: 42px; height: 42px; flex: 0 0 auto;
+    display: grid; place-items: center;
+    border-radius: 9px;
+    background: var(--ink);
+    color: #fff;
+    font: 600 10.5px var(--font-mono);
+    letter-spacing: .02em;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.2);
+  }
+  .key-head-text { min-width: 0; flex: 1; }
+  .key-head h2 {
+    margin: 3px 0 0;
+    font-size: 16px; font-weight: 600; letter-spacing: -.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .assign-cards { display: grid; gap: 7px; }
+  .assign-card {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 10px 11px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .14s ease, background .14s ease, box-shadow .14s ease;
+  }
+  .assign-card:hover { border-color: var(--line-2); background: #f8fbfc; }
+  .assign-card.active {
+    border-color: var(--accent);
+    background: linear-gradient(180deg, #fff, #f2f9fc);
+    box-shadow: 0 0 0 3px var(--accent-2);
+  }
+  .assign-main { min-width: 0; flex: 1; display: grid; gap: 2px; }
+  .assign-kicker {
+    font: 500 8.5px var(--font-mono);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .assign-name {
+    font-size: 12.5px; font-weight: 500; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .assign-code { font: 9.5px var(--font-mono); color: var(--faint); flex: 0 0 auto; }
+  .assign-card.active .assign-code { color: var(--accent); }
+  .assign-edit {
+    flex: 0 0 auto;
+    font: 8.5px var(--font-mono);
+    color: var(--accent);
+    letter-spacing: .06em;
+  }
+
+  .picker { margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--line); }
+  .picker-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  .picker-head h3 { margin: 3px 0 0; font-size: 13px; font-weight: 600; }
+  .picker-hint { font: 9px var(--font-mono); color: var(--faint); }
+  .search {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-2); }
+  .search svg { width: 14px; height: 14px; color: var(--faint); flex: 0 0 auto; }
+  .search input {
+    border: 0; outline: 0; background: transparent;
+    width: 100%;
+    font-size: 11.5px; color: var(--ink);
+  }
+  .search input::placeholder { color: var(--faint); }
+  .cats {
+    display: flex; flex-wrap: wrap; gap: 5px;
+    padding: 10px 0 9px;
+  }
+  .cat {
+    flex: 0 0 auto;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    padding: 4px 9px;
+    font-size: 9.5px; color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .cat:hover { border-color: var(--line-2); color: var(--ink); }
+  .cat.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .options {
+    max-height: 292px; overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #fff;
+    overscroll-behavior: contain;
+  }
+  .option {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%;
+    padding: 7px 9px;
+    border: 0;
+    border-bottom: 1px solid #edf1f3;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+  .option:last-child { border-bottom: 0; }
+  .option:hover { background: #f2f8fb; }
+  .option.is-current { background: var(--accent-2); }
+  .option.is-current .oname { color: var(--accent); font-weight: 600; }
+  .oname { font-size: 11px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oshort { margin-left: auto; font: 9px var(--font-mono); color: var(--faint); flex: 0 0 auto; }
+  .ocode { width: 26px; text-align: right; font: 9px var(--font-mono); color: var(--faint); flex: 0 0 auto; }
+  .option-empty { padding: 16px 10px; text-align: center; font-size: 10.5px; color: var(--faint); }
+
+  .raw { margin-top: 10px; }
+  .raw summary {
+    cursor: pointer;
+    font: 9.5px var(--font-mono);
+    color: var(--faint);
+    letter-spacing: .04em;
+    user-select: none;
+  }
+  .raw summary:hover { color: var(--muted); }
+  .raw-row { display: flex; align-items: center; gap: 7px; margin-top: 8px; }
+  .raw-row input {
+    width: 74px;
+    padding: 5px 7px;
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    background: #fff;
+    font: 10px var(--font-mono);
+    outline: 0;
+  }
+  .raw-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-2); }
+  .raw-note { font: 9px var(--font-mono); color: var(--faint); }
+  .inspector-note {
+    margin: 14px 0 0;
+    font-size: 10px; line-height: 1.55;
+    color: var(--faint);
+  }
+  .hint-card {
+    margin: 0 0 12px;
+    padding: 9px 10px;
+    border: 1px solid #c9dfe9;
+    border-radius: 8px;
+    background: #f2f9fc;
+    font-size: 10.5px; line-height: 1.55; color: #2a5a70;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hint-card span { flex: 1; }
+  .hint-card button {
+    flex: 0 0 auto;
+    border: 1px solid #b9d4e0;
+    background: #fff;
+    border-radius: 5px;
+    padding: 3px 6px;
+    font-size: 9.5px;
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .hint-card button:hover { border-color: var(--accent); }
+
+  /* ---------- footer ---------- */
+  .footer {
+    display: flex; align-items: center; gap: 9px;
+    padding: 18px 2px 0;
+    margin-top: 18px;
+    border-top: 1px solid var(--line);
+    font: 9px var(--font-mono);
+    letter-spacing: .06em;
+    color: var(--faint);
+  }
+  .footer-sep { color: var(--line-2); }
+
+  /* ---------- modal / toast ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 50;
+    display: grid; place-items: center;
+    padding: 20px;
+    background: rgba(11, 18, 24, .46);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .modal {
+    width: min(560px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    background: var(--surface);
+    box-shadow: 0 32px 80px -24px rgba(8,16,24,.6);
+  }
+  .modal h2 { margin: 5px 0 8px; font-size: 18px; font-weight: 600; letter-spacing: -.015em; }
+  .modal p { margin: 0 0 14px; font-size: 11.5px; line-height: 1.65; color: var(--muted); }
+  .change-list {
+    margin: 0 0 14px; padding: 0; list-style: none;
+    max-height: 190px; overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .change-list li {
+    padding: 7px 10px;
+    border-bottom: 1px solid #edf1f3;
+    font: 10px/1.55 var(--font-mono);
+    color: var(--ink-2);
+  }
+  .change-list li:last-child { border-bottom: 0; }
+  .change-list .from { color: var(--muted); }
+  .change-list .to { color: var(--accent); }
+  .modal-warn {
+    display: flex; gap: 8px;
+    padding: 9px 10px;
+    border: 1px solid #e2c3bf;
+    border-radius: 8px;
+    background: var(--danger-2);
+    color: #7d3732;
+    font-size: 10.5px; line-height: 1.55;
+  }
+  .modal-warn svg { width: 14px; height: 14px; flex: 0 0 auto; margin-top: 1px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 26px; z-index: 60;
+    transform: translateX(-50%) translateY(10px);
+    padding: 9px 14px;
+    border-radius: 8px;
+    background: var(--ink);
+    color: #fff;
+    font-size: 11.5px;
+    box-shadow: 0 14px 34px -14px rgba(8,16,24,.7);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+    max-width: calc(100vw - 32px);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { background: #7d3732; }
+
+  @media (max-width: 1120px) {
+    .workspace { grid-template-columns: minmax(0, 1fr); }
+    .inspector { position: static; }
+  }
+  @media (max-width: 780px) {
+    .app { padding: 14px 14px 24px; }
+    .topbar { flex-wrap: wrap; gap: 12px; }
+    .nameplate { order: 3; width: 100%; margin-left: 0; }
+    .top-actions { margin-left: auto; }
+    .stage { padding: 12px; }
+    .stage-foot { align-items: flex-start; flex-direction: column; }
+    .toolbar { width: 100%; }
+    .toolbar .btn { flex: 1 1 auto; justify-content: center; }
+    .inspector { padding: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">NIZ</div>
+      <div>
+        <div class="eyebrow">Electrostatic keyboard · 2015</div>
+        <h1>75EC <span>改键台</span></h1>
+      </div>
+    </div>
+
+    <div class="nameplate" aria-label="键盘铭牌">
+      <div class="plate-row"><span class="plate-brand">NIZ</span><span>75EC-XRGB</span><span class="plate-sep">/</span><span>EC</span></div>
+      <div class="plate-sub">SN <span class="plate-sep">·</span> 75 KEY <span class="plate-sep">·</span> USB HID</div>
+    </div>
+
+    <div class="top-actions">
+      <div class="conn-pill hidden" id="connPill">
+        <span class="led" id="pillLed"></span>
+        <span id="connPillText">已连接</span>
+        <button class="link" id="disconnectBtn" type="button">断开</button>
+      </div>
+      <button class="btn btn-primary" id="connectBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg>
+        连接键盘
+      </button>
+      <button class="btn hidden" id="fallbackBtn" type="button">用 VID/PID 重试</button>
+    </div>
+  </header>
+
+  <div class="notice hidden" id="notice" role="status">
+    <span class="notice-text" id="noticeText"></span>
+    <button class="notice-close" id="noticeClose" type="button" aria-label="关闭提示">×</button>
+  </div>
+
+  <main class="workspace">
+    <section class="stage" aria-label="键盘键位">
+      <div class="stage-head">
+        <div class="segmented" id="layerSwitch" role="tablist" aria-label="编辑层"></div>
+        <div class="readout" id="readout">
+          <span class="led" id="readoutLed"></span>
+          <span id="readoutText">未连接</span>
+        </div>
+      </div>
+
+      <div class="progress hidden" id="progress"><i id="progressBar"></i></div>
+
+      <div class="deck-viewport">
+        <div class="deck-shell">
+          <div class="deck-plate" id="deckPlate">
+            <div class="deck-rows" id="deckRows"></div>
+          </div>
+          <div class="deck-overlay" id="deckOverlay">
+            <div class="overlay-card">
+              <div class="overlay-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg>
+              </div>
+              <h3>连接键盘，读取当前键位</h3>
+              <p>用 Chrome 打开本页，点击连接后选择 <b>75EC-XRGB</b> 的配置接口。读取的是键盘板载配置，不经过任何服务器。</p>
+              <button class="btn btn-primary" id="overlayConnect" type="button">连接键盘</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-foot">
+        <div class="change-summary" id="changeSummary">尚未读取</div>
+        <div class="toolbar">
+          <button class="btn" id="readBtn" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+            读取
+          </button>
+          <button class="btn" id="undoBtn" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+            撤销
+          </button>
+          <button class="btn" id="exportBtn" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            导出
+          </button>
+          <button class="btn" id="importBtn" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+            导入
+          </button>
+          <button class="btn btn-accent" id="writeBtn" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
+            写入键盘
+          </button>
+        </div>
+      </div>
+
+      <details class="log" id="logBox">
+        <summary>通讯记录</summary>
+        <div class="log-lines" id="logLines"></div>
+      </details>
+    </section>
+
+    <aside class="inspector" aria-label="按键设置">
+      <div class="inspector-empty" id="inspectorEmpty">
+        <div class="icon-wrap" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M10 13h.01M14 13h.01M18 13h.01M7 17h10"/></svg>
+        </div>
+        <div class="eyebrow">Key inspector</div>
+        <h2>选择一个键</h2>
+        <p>点击键盘上的任意键，查看并修改它在普通层和 Fn 层的功能。修改先留在网页里，确认后再写入键盘。</p>
+        <ol class="steps">
+          <li><span>01</span>连接键盘并读取当前配置</li>
+          <li><span>02</span>点一个键，选普通层或 Fn 层</li>
+          <li><span>03</span>搜索功能，写入键盘</li>
+        </ol>
+      </div>
+
+      <div class="inspector-body hidden" id="inspectorBody">
+        <div class="key-head">
+          <div class="key-badge" id="keyBadge">K00</div>
+          <div class="key-head-text">
+            <div class="eyebrow">Physical key</div>
+            <h2 id="keyTitle">—</h2>
+          </div>
+          <button class="icon-btn" id="revertKeyBtn" type="button" title="将此键恢复为读取时的值" aria-label="将此键恢复为读取时的值">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+          </button>
+        </div>
+
+        <div class="hint-card hidden" id="rshiftHint">
+          <span>这个物理键是右 Shift；当前普通层把它映射成了 Up。若想恢复，点这里。</span>
+          <button type="button" id="rshiftRestore">改回 Shift</button>
+        </div>
+
+        <div class="assign-cards" id="assignCards"></div>
+
+        <div class="picker">
+          <div class="picker-head">
+            <div>
+              <div class="eyebrow">Assign</div>
+              <h3 id="pickerTitle">普通层功能</h3>
+            </div>
+            <span class="picker-hint">点上方层可切换</span>
+          </div>
+          <label class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="searchInput" type="search" placeholder="搜索：音量、PgUp、Backspace…" autocomplete="off" spellcheck="false">
+          </label>
+          <div class="cats" id="cats"></div>
+          <div class="options" id="options"></div>
+          <details class="raw">
+            <summary>直接输入原始键码</summary>
+            <div class="raw-row">
+              <input id="rawInput" type="number" min="0" max="255" step="1" placeholder="0–255" inputmode="numeric">
+              <button class="btn btn-small" id="rawApply" type="button">应用</button>
+              <span class="raw-note">0 = 无功能</span>
+            </div>
+          </details>
+        </div>
+
+        <p class="inspector-note">修改只保存在网页里；点击「写入键盘」才会写进键盘板载 Flash。</p>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <span id="transportLabel">本地运行 · WebHID</span>
+    <span class="footer-sep">/</span>
+    <span>配置写入键盘板载 Flash</span>
+    <span class="footer-sep">/</span>
+    <span>无数据上传</span>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<div class="modal-backdrop hidden" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalText">
+    <div class="eyebrow">Write to keyboard</div>
+    <h2 id="modalTitle">写入键盘？</h2>
+    <p id="modalText"></p>
+    <ul class="change-list" id="modalChanges"></ul>
+    <div class="modal-warn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      <span>写入前会自动下载一份当前键盘配置的备份。写入过程中请勿拔线、关闭页面或切换键盘模式。</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="modalCancel" type="button">取消</button>
+      <button class="btn btn-primary" id="modalConfirm" type="button">备份并写入</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="application/json,.json" hidden>
+
+<script src="./bridge-config.js"></script>
+<script>
+(() => {
+  'use strict';
+
+  /* ============================================================
+     Keycode table (HWCODE values read from the keyboard)
+     ============================================================ */
+  const K = [];
+  const addK = (code, name, short, cat, common = false) => K.push({ code, name, short, cat, common });
+
+  addK(0, '无功能', '—', 'none', true);
+  addK(1, 'Esc 退出', 'Esc', 'fn', true);
+  for (let i = 1; i <= 12; i++) addK(1 + i, `F${i}`, `F${i}`, 'fn', true);
+
+  addK(14, '反引号 `', '`', 'symbol', false);
+  const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+  digits.forEach((d, i) => addK(15 + i, `数字 ${d}`, d, 'digit', true));
+  addK(25, '减号 -', '-', 'symbol', false);
+  addK(26, '等号 =', '=', 'symbol', false);
+  addK(27, '退格 Backspace', 'Bksp', 'fn', true);
+  addK(28, 'Tab 制表', 'Tab', 'fn', true);
+
+  const letters = {
+    29: 'Q', 30: 'W', 31: 'E', 32: 'R', 33: 'T', 34: 'Y', 35: 'U', 36: 'I', 37: 'O', 38: 'P',
+    43: 'A', 44: 'S', 45: 'D', 46: 'F', 47: 'G', 48: 'H', 49: 'J', 50: 'K', 51: 'L',
+    56: 'Z', 57: 'X', 58: 'C', 59: 'V', 60: 'B', 61: 'N', 62: 'M'
+  };
+  Object.entries(letters).forEach(([code, letter]) => addK(+code, `字母 ${letter}`, letter, 'alpha', true));
+
+  addK(39, '左方括号 [', '[', 'symbol', false);
+  addK(40, '右方括号 ]', ']', 'symbol', false);
+  addK(41, '反斜杠 \\', '\\', 'symbol', false);
+  addK(42, 'Caps Lock 大写锁定', 'Caps', 'mod', true);
+  addK(52, '分号 ;', ';', 'symbol', false);
+  addK(53, "单引号 '", "'", 'symbol', false);
+  addK(54, 'Enter 回车', 'Enter', 'fn', true);
+  addK(55, '左 Shift', 'Shift', 'mod', true);
+  addK(63, '逗号 ,', ',', 'symbol', false);
+  addK(64, '句号 .', '.', 'symbol', false);
+  addK(65, '斜杠 /', '/', 'symbol', false);
+  addK(66, '右 Shift', 'Shift', 'mod', true);
+  addK(67, '左 Ctrl', 'Ctrl', 'mod', true);
+  addK(68, '左 Win / Command', 'Win', 'mod', true);
+  addK(69, '左 Alt / Option', 'Alt', 'mod', true);
+  addK(70, '空格 Space', 'Space', 'fn', true);
+  addK(71, '右 Alt / Option', 'Alt', 'mod', false);
+  addK(72, '右 Win / Command', 'Win', 'mod', false);
+  addK(73, '菜单键 Context Menu', '菜单', 'fn', false);
+  addK(74, '右 Ctrl', 'Ctrl', 'mod', false);
+
+  const extra = [
+    [75, '唤醒 Wakeup', '唤醒', 'system'],
+    [76, '睡眠 Sleep', '睡眠', 'system'],
+    [77, '电源 Power', '电源', 'system'],
+    [78, 'Print Screen', 'PrtSc', 'fn'],
+    [79, 'Scroll Lock', 'ScrLk', 'fn'],
+    [80, 'Pause 暂停', 'Pause', 'fn'],
+    [81, 'Insert', 'Ins', 'nav'],
+    [82, 'Home', 'Home', 'nav'],
+    [83, 'Page Up', 'PgUp', 'nav'],
+    [84, 'Delete 删除', 'Del', 'nav'],
+    [85, 'End', 'End', 'nav'],
+    [86, 'Page Down', 'PgDn', 'nav'],
+    [87, 'Up 上箭头', '↑', 'nav'],
+    [88, 'Left 左箭头', '←', 'nav'],
+    [89, 'Down 下箭头', '↓', 'nav'],
+    [90, 'Right 右箭头', '→', 'nav'],
+    [91, 'Num Lock', 'Num', 'kp'],
+    [92, '小键盘 /', '/', 'kp'],
+    [93, '小键盘 *', '*', 'kp'],
+    [94, '小键盘 7', '7', 'kp'],
+    [95, '小键盘 8', '8', 'kp'],
+    [96, '小键盘 9', '9', 'kp'],
+    [97, '小键盘 4', '4', 'kp'],
+    [98, '小键盘 5', '5', 'kp'],
+    [99, '小键盘 6', '6', 'kp'],
+    [100, '小键盘 1', '1', 'kp'],
+    [101, '小键盘 2', '2', 'kp'],
+    [102, '小键盘 3', '3', 'kp'],
+    [103, '小键盘 0', '0', 'kp'],
+    [104, '小键盘 .', '.', 'kp'],
+    [105, '小键盘 -', '-', 'kp'],
+    [106, '小键盘 +', '+', 'kp'],
+    [107, '小键盘 Enter', 'Enter', 'kp'],
+    [108, '媒体：下一曲', '下一曲', 'media'],
+    [109, '媒体：上一曲', '上一曲', 'media'],
+    [110, '媒体：停止', '停止', 'media'],
+    [111, '媒体：播放 / 暂停', '播放', 'media'],
+    [112, '媒体：静音', '静音', 'media'],
+    [113, '媒体：音量 +', '音量+', 'media'],
+    [114, '媒体：音量 -', '音量-', 'media'],
+    [115, '媒体：选择', '媒体', 'media'],
+    [116, '打开邮件', '邮件', 'media'],
+    [117, '计算器', '计算器', 'media'],
+    [118, '我的电脑', '我的电脑', 'media'],
+    [119, '浏览器：搜索', '搜索', 'media'],
+    [120, '浏览器：主页', '主页', 'media'],
+    [121, '浏览器：后退', '后退', 'media'],
+    [122, '浏览器：前进', '前进', 'media'],
+    [123, '浏览器：停止', '停止', 'media'],
+    [124, '浏览器：刷新', '刷新', 'media'],
+    [125, '浏览器：收藏', '收藏', 'media'],
+    [126, '鼠标：左移', '左移', 'mouse'],
+    [127, '鼠标：右移', '右移', 'mouse'],
+    [128, '鼠标：上移', '上移', 'mouse'],
+    [129, '鼠标：下移', '下移', 'mouse'],
+    [130, '鼠标键：左键', '左击', 'mouse'],
+    [131, '鼠标键：右键', '右击', 'mouse'],
+    [132, '鼠标键：中键', '中击', 'mouse'],
+    [133, '滚轮：上', '滚轮↑', 'mouse'],
+    [134, '滚轮：下', '滚轮↓', 'mouse'],
+    [135, '背光开关', '背光', 'light'],
+    [136, '背光录制', '录制', 'light'],
+    [137, '演示模式', '演示', 'light'],
+    [138, '流星灯效', '流星', 'light'],
+    [139, '涟漪灯效', '涟漪', 'light'],
+    [140, '停止演示', '停演', 'light'],
+    [141, '呼吸灯', '呼吸', 'light'],
+    [142, '呼吸序列 -', '呼吸-', 'light'],
+    [143, '呼吸序列 +', '呼吸+', 'light'],
+    [144, '亮度 -', '亮度-', 'light'],
+    [145, '亮度 +', '亮度+', 'light'],
+    [146, '日落 / 极光', '日落', 'light'],
+    [147, '彩色呼吸', '彩色', 'light'],
+    [148, '背光换色', '换色', 'light'],
+    [149, '触发行程调节', '行程', 'system'],
+    [150, '键盘锁定', '锁键', 'system'],
+    [151, 'Shift + 上', 'Shift+↑', 'system'],
+    [152, 'Ctrl / Caps 互换', 'Ctrl/Caps', 'system'],
+    [153, 'Win 键锁定', 'Win锁', 'system'],
+    [154, '鼠标锁定', '鼠标锁', 'system'],
+    [155, 'Win / Mac 互换', 'Win/Mac', 'system'],
+    [156, '右 Fn', 'R-Fn', 'system'],
+    [157, '鼠标步进：像素', '像素', 'system'],
+    [158, '鼠标步进：时间', '时间', 'system'],
+    [159, '编程键盘', '编程', 'system'],
+    [160, '背光录制 1', '录制1', 'light'],
+    [161, '背光录制 2', '录制2', 'light'],
+    [162, '背光录制 3', '录制3', 'light'],
+    [163, '背光录制 4', '录制4', 'light'],
+    [164, '背光录制 5', '录制5', 'light'],
+    [165, '背光录制 6', '录制6', 'light'],
+    [166, '左 Fn', 'L-Fn', 'system'],
+    [167, '有线 / 无线切换', '有线/无线', 'system'],
+    [168, '蓝牙设备 1', '蓝牙1', 'system'],
+    [169, '蓝牙设备 2', '蓝牙2', 'system'],
+    [170, '蓝牙设备 3', '蓝牙3', 'system'],
+    [171, '游戏模式', '游戏', 'system'],
+    [172, '节能模式', '节能', 'system'],
+    [173, '鼠标首次延迟', '延迟', 'system'],
+    [174, '按键重复率', '重复率', 'system'],
+    [175, '按键响应延迟', '响应', 'system'],
+    [176, 'USB 回报率', '回报率', 'system'],
+    [177, '按键扫描周期', '扫描', 'system'],
+    [199, '鼠标左键双击', '双击', 'mouse'],
+    [204, '特殊键 <>|', '<>|', 'symbol']
+  ];
+  extra.forEach(([code, name, short, cat]) => addK(code, name, short, cat, false));
+
+  // Codes not named by the firmware are still writable as raw numbers.
+  for (let code = 178; code <= 255; code++) {
+    if ([199, 204].includes(code)) continue;
+    addK(code, `未知键码 ${code}`, String(code), 'unknown', false);
+  }
+
+  const byCode = new Map(K.map(k => [k.code, k]));
+  const keyInfo = (code) => byCode.get(code) || {
+    code, name: `未知键码 ${code}`, short: String(code), cat: 'unknown', common: false
+  };
+
+  const CATS = [
+    ['common', '常用'], ['all', '全部'], ['alpha', '字母'], ['digit', '数字'],
+    ['symbol', '符号'], ['fn', '功能键'], ['mod', '修饰'], ['nav', '导航'],
+    ['kp', '小键盘'], ['media', '媒体'], ['mouse', '鼠标'], ['light', '灯效'],
+    ['system', '系统'], ['unknown', '未知']
+  ];
+
+  /* ============================================================
+     Physical layout of the 75EC (key IDs from the firmware)
+     ============================================================ */
+  const PHYS = {
+    1: 'Esc', 2: 'F1', 3: 'F2', 4: 'F3', 5: 'F4', 6: 'F5', 7: 'F6', 8: 'F7',
+    9: 'F8', 10: 'F9', 11: 'F10', 12: 'F11', 13: 'F12', 14: 'Del',
+    15: '`', 16: '1', 17: '2', 18: '3', 19: '4', 20: '5', 21: '6', 22: '7',
+    23: '8', 24: '9', 25: '0', 26: '-', 27: '=', 28: 'Bksp',
+    29: 'Tab', 30: 'Q', 31: 'W', 32: 'E', 33: 'R', 34: 'T', 35: 'Y', 36: 'U',
+    37: 'I', 38: 'O', 39: 'P', 40: '[', 41: ']', 42: '\\',
+    43: 'Caps', 44: 'A', 45: 'S', 46: 'D', 47: 'F', 48: 'G', 49: 'H', 50: 'J',
+    51: 'K', 52: 'L', 53: ';', 54: "'", 55: 'Enter',
+    56: 'Shift', 57: 'Z', 58: 'X', 59: 'C', 60: 'V', 61: 'B', 62: 'N', 63: 'M',
+    64: ',', 65: '.', 66: '/', 67: 'RShift',
+    68: 'Ctrl', 69: 'Win', 70: 'Alt', 71: 'Space', 72: 'Fn', 73: '←', 74: '↓', 75: '→'
+  };
+
+  const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+
+  const LAYOUT = [
+    { fill: true, keys: range(1, 14).map(id => [id, 1]) },
+    { keys: [[15, 1], ...range(16, 27).map(id => [id, 1]), [28, 2]] },
+    { keys: [[29, 1.5], ...range(30, 39).map(id => [id, 1]), [40, 1], [41, 1], [42, 1.5]] },
+    { keys: [[43, 1.75], ...range(44, 52).map(id => [id, 1]), [53, 1], [54, 1], [55, 2.25]] },
+    { keys: [[56, 2.25], ...range(57, 63).map(id => [id, 1]), [64, 1], [65, 1], [66, 1], [67, 2.75]] },
+    { keys: [[68, 1.25], [69, 1.25], [70, 1.25], [71, 6.25], [72, 1.25], [73, 1.25], [74, 1.25], [75, 1.25]] }
+  ];
+
+  function physName(id) {
+    const p = PHYS[id] || '—';
+    const special = {
+      1: 'Esc 退出', 14: 'Delete 删除', 15: '反引号 `', 26: '减号 -', 27: '等号 =',
+      28: '退格 Backspace', 29: 'Tab 制表', 40: '左方括号 [', 41: '右方括号 ]',
+      42: '反斜杠 \\', 43: 'Caps Lock 大写锁定', 53: '分号 ;', 54: '单引号 \'',
+      55: 'Enter 回车', 56: '左 Shift', 67: '右 Shift', 68: '左 Ctrl',
+      69: '左 Win / Command', 70: '左 Alt / Option', 71: '空格 Space',
+      72: 'Fn 功能', 73: '左方向 ←', 74: '下方向 ↓', 75: '右方向 →'
+    };
+    if (special[id]) return special[id];
+    if (/^F\d{1,2}$/.test(p)) return `功能键 ${p}`;
+    if (/^[A-Z]$/.test(p)) return `字母 ${p}`;
+    if (/^\d$/.test(p)) return `数字 ${p}`;
+    return `符号 ${p}`;
+  }
+
+  /* ============================================================
+     State
+     ============================================================ */
+  const CMD = { VERSION: 0xf9, READ_ALL: 0xf2, WRITE_ALL: 0xf1, KEY_DATA: 0xf0, DATA_END: 0xf6 };
+  const FILTER = { vendorId: 0x0483, productId: 0x5026, usagePage: 0x008c, usage: 0x0001 };
+  const BROAD_FILTER = { vendorId: 0x0483, productId: 0x5026 };
+  const DEMO_ROWS = [[1,1,1],[1,2,2],[1,3,3],[1,4,4],[1,5,5],[1,6,6],[1,7,7],[1,8,8],[1,9,9],[1,10,10],[1,11,11],[1,12,12],[1,13,13],[1,14,84],[1,15,14],[1,16,15],[1,17,16],[1,18,17],[1,19,18],[1,20,19],[1,21,20],[1,22,21],[1,23,22],[1,24,23],[1,25,24],[1,26,25],[1,27,26],[1,28,27],[1,29,28],[1,30,29],[1,31,30],[1,32,31],[1,33,32],[1,34,33],[1,35,34],[1,36,35],[1,37,36],[1,38,37],[1,39,38],[1,40,39],[1,41,40],[1,42,41],[1,43,42],[1,44,43],[1,45,44],[1,46,45],[1,47,46],[1,48,47],[1,49,48],[1,50,49],[1,51,50],[1,52,51],[1,53,52],[1,54,53],[1,55,54],[1,56,55],[1,57,56],[1,58,57],[1,59,58],[1,60,59],[1,61,60],[1,62,61],[1,63,62],[1,64,63],[1,65,64],[1,66,65],[1,67,87],[1,68,67],[1,69,68],[1,70,69],[1,71,70],[1,72,156],[1,73,88],[1,74,89],[1,75,90],[2,1,135],[2,2,0],[2,3,0],[2,4,0],[2,5,0],[2,6,0],[2,7,0],[2,8,0],[2,9,0],[2,10,0],[2,11,148],[2,12,149],[2,13,150],[2,14,159],[2,15,136],[2,16,137],[2,17,138],[2,18,139],[2,19,141],[2,20,142],[2,21,143],[2,22,0],[2,23,0],[2,24,0],[2,25,0],[2,26,0],[2,27,0],[2,28,84],[2,29,0],[2,30,0],[2,31,87],[2,32,0],[2,33,0],[2,34,0],[2,35,0],[2,36,0],[2,37,0],[2,38,0],[2,39,0],[2,40,0],[2,41,0],[2,42,0],[2,43,0],[2,44,88],[2,45,89],[2,46,90],[2,47,0],[2,48,0],[2,49,0],[2,50,0],[2,51,0],[2,52,0],[2,53,0],[2,54,0],[2,55,0],[2,56,0],[2,57,0],[2,58,0],[2,59,0],[2,60,0],[2,61,0],[2,62,0],[2,63,0],[2,64,0],[2,65,0],[2,66,0],[2,67,0],[2,68,0],[2,69,0],[2,70,0],[2,71,0],[2,72,156],[2,73,114],[2,74,113],[2,75,112]];
+
+  const S = {
+    device: null,
+    connected: false,
+    busy: false,
+    demo: false,
+    transport: 'hid',
+    version: '',
+    keycount: 0,
+    layers: [],
+    layer: 1,
+    selected: null,
+    baseline: [],
+    mapping: [],
+    baseIndex: new Map(),
+    mapIndex: new Map(),
+    cat: 'common',
+    hidFailed: false,
+    logs: []
+  };
+
+  const reportListeners = new Set();
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  const cloneRows = (rows) => rows.map(r => ({ level: r.level, key: r.key, hw: r.hw }));
+
+  /* ============================================================
+     DOM references
+     ============================================================ */
+  const els = {
+    app: $('#app'),
+    layerSwitch: $('#layerSwitch'),
+    readoutLed: $('#readoutLed'),
+    readoutText: $('#readoutText'),
+    progress: $('#progress'),
+    progressBar: $('#progressBar'),
+    deckRows: $('#deckRows'),
+    deckPlate: $('#deckPlate'),
+    deckOverlay: $('#deckOverlay'),
+    changeSummary: $('#changeSummary'),
+    readBtn: $('#readBtn'),
+    undoBtn: $('#undoBtn'),
+    exportBtn: $('#exportBtn'),
+    importBtn: $('#importBtn'),
+    writeBtn: $('#writeBtn'),
+    connectBtn: $('#connectBtn'),
+    fallbackBtn: $('#fallbackBtn'),
+    connPill: $('#connPill'),
+    connPillText: $('#connPillText'),
+    pillLed: $('#pillLed'),
+    disconnectBtn: $('#disconnectBtn'),
+    notice: $('#notice'),
+    noticeText: $('#noticeText'),
+    noticeClose: $('#noticeClose'),
+    logLines: $('#logLines'),
+    inspectorEmpty: $('#inspectorEmpty'),
+    inspectorBody: $('#inspectorBody'),
+    keyBadge: $('#keyBadge'),
+    keyTitle: $('#keyTitle'),
+    assignCards: $('#assignCards'),
+    pickerTitle: $('#pickerTitle'),
+    searchInput: $('#searchInput'),
+    cats: $('#cats'),
+    options: $('#options'),
+    rawInput: $('#rawInput'),
+    rawApply: $('#rawApply'),
+    revertKeyBtn: $('#revertKeyBtn'),
+    rshiftHint: $('#rshiftHint'),
+    rshiftRestore: $('#rshiftRestore'),
+    toast: $('#toast'),
+    modalBackdrop: $('#modalBackdrop'),
+    modalChanges: $('#modalChanges'),
+    modalCancel: $('#modalCancel'),
+    modalConfirm: $('#modalConfirm'),
+    fileInput: $('#fileInput'),
+    overlayConnect: $('#overlayConnect')
+  };
+
+  /* ============================================================
+     Rows / indexes
+     ============================================================ */
+  const rowKey = (level, key) => `${level}:${key}`;
+
+  function rebuildIndexes() {
+    S.baseIndex = new Map(S.baseline.map(r => [rowKey(r.level, r.key), r]));
+    S.mapIndex = new Map(S.mapping.map(r => [rowKey(r.level, r.key), r]));
+  }
+
+  function getHw(level, key) {
+    const row = S.mapIndex.get(rowKey(level, key));
+    return row ? row.hw : 0;
+  }
+
+  function setHw(level, key, hw) {
+    const row = S.mapIndex.get(rowKey(level, key));
+    if (row) {
+      row.hw = hw;
+    } else {
+      S.mapping.push({ level, key, hw });
+      S.mapIndex.set(rowKey(level, key), S.mapping[S.mapping.length - 1]);
+    }
+  }
+
+  function changedKeys() {
+    const keys = new Set();
+    for (const row of S.mapping) {
+      const base = S.baseIndex.get(rowKey(row.level, row.key));
+      if (!base || base.hw !== row.hw) keys.add(row.key);
+    }
+    for (const row of S.baseline) {
+      if (!S.mapIndex.has(rowKey(row.level, row.key))) keys.add(row.key);
+    }
+    return keys;
+  }
+
+  function changes() {
+    const out = [];
+    for (const row of S.mapping) {
+      const base = S.baseIndex.get(rowKey(row.level, row.key));
+      if (!base || base.hw !== row.hw) {
+        out.push({ level: row.level, key: row.key, from: base ? base.hw : 0, to: row.hw });
+      }
+    }
+    return out;
+  }
+
+  function sameRows(a, b) {
+    if (a.length !== b.length) return false;
+    const index = new Map(b.map(r => [rowKey(r.level, r.key), r.hw]));
+    return a.every(r => index.get(rowKey(r.level, r.key)) === r.hw);
+  }
+
+  const orderedRows = (rows) => [...rows].sort((a, b) => a.level - b.level || a.key - b.key);
+
+  /* ============================================================
+     Layout / render
+     ============================================================ */
+  let deckBuilt = false;
+
+  function buildDeck() {
+    els.deckRows.textContent = '';
+    for (const row of LAYOUT) {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'deck-row' + (row.fill ? ' fill' : '');
+      for (const [id, w] of row.keys) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'key';
+        btn.dataset.key = String(id);
+        btn.style.setProperty('--w', String(w));
+        const phys = document.createElement('span');
+        phys.className = 'phys';
+        phys.textContent = PHYS[id] || '';
+        const assign = document.createElement('span');
+        assign.className = 'assign';
+        btn.append(phys, assign);
+        btn.addEventListener('click', () => selectKey(id));
+        rowEl.appendChild(btn);
+      }
+      els.deckRows.appendChild(rowEl);
+    }
+    deckBuilt = true;
+    fitDeck();
+  }
+
+  function fitDeck() {
+    if (!els.deckPlate) return;
+    const width = els.deckPlate.clientWidth;
+    if (!width) return;
+    const inner = Math.max(0, width - 20); // deck-plate horizontal padding
+    const u = Math.max(28, inner / 15.84);
+    els.deckPlate.style.setProperty('--u', `${u.toFixed(2)}px`);
+    els.deckPlate.style.setProperty('--gap', `${(u * 0.06).toFixed(2)}px`);
+  }
+
+  function sameLegend(a, b) {
+    if (!a || !b) return false;
+    const norm = (s) => s.toLowerCase().replace(/\s+/g, '');
+    if (norm(a) === norm(b)) return true;
+    const aliases = { bksp: 'backspace', del: 'delete', rshift: 'shift', lshift: 'shift' };
+    return aliases[norm(a)] === norm(b) || norm(a) === aliases[norm(b)];
+  }
+
+  function renderDeck() {
+    if (!deckBuilt) return;
+    const changed = changedKeys();
+    $$('.key', els.deckRows).forEach(el => {
+      const id = Number(el.dataset.key);
+      const hw = getHw(S.layer, id);
+      const info = keyInfo(hw);
+      const assign = el.querySelector('.assign');
+      assign.textContent = hw === 0 ? '—' : info.short;
+      assign.className = 'assign' +
+        (hw === 0 ? ' none' : '') +
+        (info.short.length > 4 ? ' long' : '') +
+        (/^[^\w一-鿿]$/.test(info.short) ? ' sym' : '') +
+        (/^\d+$/.test(info.short) && info.cat === 'unknown' ? ' mono' : '');
+      const phys = el.querySelector('.phys');
+      phys.style.visibility = (hw !== 0 && sameLegend(info.short, PHYS[id])) ? 'hidden' : 'visible';
+      el.classList.toggle('changed', changed.has(id));
+      el.classList.toggle('selected', S.selected === id);
+      el.setAttribute('aria-pressed', S.selected === id ? 'true' : 'false');
+      el.setAttribute('aria-label', `键位 ${id} ${PHYS[id] || ''}，当前功能 ${hw === 0 ? '无功能' : info.name}`);
+    });
+  }
+
+  function layerName(level) {
+    if (level === 1) return '普通层';
+    if (level === 2) return 'Fn 层';
+    return `第 ${level} 层`;
+  }
+
+  function renderLayerSwitch() {
+    const layers = S.layers.length ? S.layers : [1, 2];
+    els.layerSwitch.textContent = '';
+    layers.forEach(level => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.role = 'tab';
+      btn.dataset.layer = String(level);
+      btn.textContent = layerName(level);
+      btn.classList.toggle('active', S.layer === level);
+      btn.setAttribute('aria-selected', S.layer === level ? 'true' : 'false');
+      btn.addEventListener('click', () => setLayer(level));
+      els.layerSwitch.appendChild(btn);
+    });
+  }
+
+  function setLayer(level) {
+    if (S.layer === level) return;
+    S.layer = level;
+    renderLayerSwitch();
+    renderDeck();
+    renderInspector();
+    updateButtons();
+  }
+
+  function fwLabel(version) {
+    if (!version) return '—';
+    const parts = version.split(';').map(s => s.trim()).filter(Boolean);
+    return parts.find(p => /^V\d/.test(p)) || parts[1] || version;
+  }
+
+  function renderReadout() {
+    els.readoutLed.classList.toggle('on', S.connected);
+    els.readoutLed.classList.toggle('demo', !S.connected && S.demo);
+    let text = '未连接';
+    if (S.demo) {
+      text = '演示数据 · 未连接';
+    } else if (S.connected) {
+      text = `${S.keycount || '—'} 键 · ${S.layers.length || '—'} 层 · FW ${fwLabel(S.version)}`;
+    } else if (S.mapping.length) {
+      text = '未连接 · 显示上次读取';
+    }
+    els.readoutText.textContent = text;
+  }
+
+  function renderConnection() {
+    const connected = S.connected;
+    const bridge = S.transport === 'bridge';
+    els.connectBtn.classList.toggle('hidden', connected);
+    els.connPill.classList.toggle('hidden', !connected);
+    els.pillLed.classList.toggle('on', connected);
+    els.connPillText.textContent = connected
+      ? (bridge ? '已连接 · 本地桥接' : '已连接 · 75EC-XRGB')
+      : '未连接';
+    els.disconnectBtn.classList.toggle('hidden', bridge);
+    els.deckOverlay.classList.toggle('hidden', S.mapping.length > 0);
+    els.fallbackBtn.classList.toggle('hidden', connected || !S.hidFailed || bridge);
+    renderReadout();
+  }
+
+  function renderChangeSummary() {
+    if (!S.mapping.length) {
+      els.changeSummary.textContent = '尚未读取';
+      return;
+    }
+    const n = changes().length;
+    els.changeSummary.textContent = '';
+    if (!n) {
+      els.changeSummary.textContent = S.connected ? '与键盘一致' : '与读取值一致';
+      return;
+    }
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    const strong = document.createElement('strong');
+    strong.textContent = `${n} 处`;
+    els.changeSummary.append(dot, strong, document.createTextNode('修改未写入'));
+  }
+
+  function renderCats() {
+    els.cats.textContent = '';
+    CATS.forEach(([id, label]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cat' + (S.cat === id ? ' active' : '');
+      btn.textContent = label;
+      btn.addEventListener('click', () => {
+        S.cat = id;
+        renderCats();
+        renderOptions();
+      });
+      els.cats.appendChild(btn);
+    });
+  }
+
+  function renderOptions() {
+    if (!els.options) return;
+    const q = (els.searchInput.value || '').trim().toLowerCase();
+    let list;
+    if (q) {
+      if (/^\d+$/.test(q)) {
+        list = K.filter(k => String(k.code) === q);
+      } else {
+        list = K.filter(k =>
+          k.name.toLowerCase().includes(q) ||
+          k.short.toLowerCase().includes(q) ||
+          String(k.code) === q
+        );
+      }
+    } else if (S.cat === 'common') {
+      list = K.filter(k => k.common);
+    } else if (S.cat === 'all') {
+      list = K.filter(k => k.cat !== 'unknown');
+    } else {
+      list = K.filter(k => k.cat === S.cat);
+    }
+    list = [...list].sort((a, b) => a.code - b.code);
+
+    els.options.textContent = '';
+    if (!list.length) {
+      const empty = document.createElement('div');
+      empty.className = 'option-empty';
+      empty.textContent = '没有匹配的功能或键码';
+      els.options.appendChild(empty);
+      return;
+    }
+    const current = S.selected == null ? null : getHw(S.layer, S.selected);
+    const frag = document.createDocumentFragment();
+    for (const k of list) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'option' + (current === k.code ? ' is-current' : '');
+      btn.dataset.code = String(k.code);
+      const name = document.createElement('span');
+      name.className = 'oname';
+      name.textContent = k.name;
+      const short = document.createElement('span');
+      short.className = 'oshort';
+      short.textContent = k.short;
+      const code = document.createElement('span');
+      code.className = 'ocode';
+      code.textContent = String(k.code);
+      btn.append(name, short, code);
+      btn.addEventListener('click', () => assignCode(k.code));
+      frag.appendChild(btn);
+    }
+    els.options.appendChild(frag);
+  }
+
+  function renderAssignCards() {
+    if (S.selected == null) return;
+    els.assignCards.textContent = '';
+    const layers = S.layers.length ? S.layers : [1, 2];
+    for (const level of layers) {
+      const hw = getHw(level, S.selected);
+      const info = keyInfo(hw);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'assign-card' + (S.layer === level ? ' active' : '');
+      btn.dataset.level = String(level);
+
+      const main = document.createElement('span');
+      main.className = 'assign-main';
+      const kicker = document.createElement('span');
+      kicker.className = 'assign-kicker';
+      kicker.textContent = layerName(level);
+      const name = document.createElement('span');
+      name.className = 'assign-name';
+      name.textContent = hw === 0 ? '无功能' : info.name;
+      main.append(kicker, name);
+
+      const code = document.createElement('span');
+      code.className = 'assign-code';
+      code.textContent = String(hw);
+
+      btn.append(main, code);
+      if (S.layer === level) {
+        const edit = document.createElement('span');
+        edit.className = 'assign-edit';
+        edit.textContent = 'EDIT';
+        btn.appendChild(edit);
+      }
+      btn.addEventListener('click', () => setLayer(level));
+      els.assignCards.appendChild(btn);
+    }
+  }
+
+  function renderInspector() {
+    if (S.selected == null || !S.mapping.length) {
+      els.inspectorEmpty.classList.remove('hidden');
+      els.inspectorBody.classList.add('hidden');
+      return;
+    }
+    els.inspectorEmpty.classList.add('hidden');
+    els.inspectorBody.classList.remove('hidden');
+    els.keyBadge.textContent = `K${String(S.selected).padStart(2, '0')}`;
+    els.keyTitle.textContent = physName(S.selected);
+    els.pickerTitle.textContent = `${layerName(S.layer)}功能`;
+    renderAssignCards();
+    renderOptions();
+
+    const showHint = S.selected === 67 && getHw(1, 67) !== 66;
+    els.rshiftHint.classList.toggle('hidden', !showHint);
+  }
+
+  function renderAll() {
+    renderLayerSwitch();
+    renderDeck();
+    renderInspector();
+    renderChangeSummary();
+    renderConnection();
+    updateButtons();
+  }
+
+  function updateButtons() {
+    const hasData = S.mapping.length > 0;
+    const n = changes().length;
+    els.readBtn.disabled = !S.connected || S.busy;
+    els.undoBtn.disabled = S.busy || !hasData || n === 0;
+    els.exportBtn.disabled = S.busy || !hasData;
+    els.importBtn.disabled = S.busy;
+    els.writeBtn.disabled = !S.connected || S.busy || !hasData || n === 0;
+    els.rawApply.disabled = S.busy || !hasData || S.selected == null;
+    els.rawInput.disabled = S.busy || !hasData || S.selected == null;
+    els.connectBtn.disabled = S.busy;
+    els.overlayConnect.disabled = S.busy;
+    els.revertKeyBtn.disabled = S.busy || !hasData;
+    if (S.selected != null) {
+      els.searchInput.disabled = S.busy;
+    }
+  }
+
+  function selectKey(id) {
+    if (!S.mapping.length) return;
+    S.selected = id;
+    renderDeck();
+    renderInspector();
+    updateButtons();
+  }
+
+  function assignCode(code) {
+    if (S.selected == null || !S.mapping.length) return;
+    setHw(S.layer, S.selected, code);
+    renderDeck();
+    renderAssignCards();
+    renderChangeSummary();
+    $$('.option', els.options).forEach(el => {
+      el.classList.toggle('is-current', Number(el.dataset.code) === code);
+    });
+    updateButtons();
+    if (S.selected === 67) els.rshiftHint.classList.toggle('hidden', getHw(1, 67) === 66);
+    log(`K${S.selected} ${layerName(S.layer)} → ${keyInfo(code).name}`);
+  }
+
+  /* ============================================================
+     Busy / progress / notices / logs
+     ============================================================ */
+  function setBusy(busy) {
+    S.busy = busy;
+    updateButtons();
+  }
+
+  function setProgress(done, total, label) {
+    if (!label) {
+      els.progress.classList.add('hidden');
+      return;
+    }
+    els.progress.classList.remove('hidden');
+    if (!total) {
+      els.progress.classList.add('indeterminate');
+      els.progressBar.style.width = '35%';
+    } else {
+      els.progress.classList.remove('indeterminate');
+      els.progressBar.style.width = `${Math.max(2, Math.min(100, (done / total) * 100))}%`;
+    }
+    if (label) {
+      els.readoutText.textContent = total ? `${label} ${done}/${total}` : label;
+    }
+  }
+
+  function hideProgress() {
+    els.progress.classList.add('hidden');
+    els.progress.classList.remove('indeterminate');
+    els.progressBar.style.width = '0%';
+    renderReadout();
+  }
+
+  function showNotice(text, tone = 'info') {
+    els.noticeText.textContent = text;
+    els.notice.classList.remove('hidden');
+    els.notice.classList.toggle('error', tone === 'error');
+  }
+
+  function hideNotice() {
+    els.notice.classList.add('hidden');
+  }
+
+  function log(text, tone = 'info') {
+    const now = new Date();
+    const stamp = now.toTimeString().slice(0, 8);
+    S.logs.push({ stamp, text, tone });
+    if (S.logs.length > 40) S.logs.shift();
+    els.logLines.textContent = '';
+    for (const item of S.logs.slice(-12)) {
+      const line = document.createElement('div');
+      line.className = 'log-line' + (item.tone === 'error' ? ' error' : '');
+      const time = document.createElement('time');
+      time.textContent = item.stamp;
+      const msg = document.createElement('span');
+      msg.textContent = item.text;
+      line.append(time, msg);
+      els.logLines.appendChild(line);
+    }
+    els.logLines.scrollTop = els.logLines.scrollHeight;
+  }
+
+  let toastTimer = null;
+  function toast(text, tone = 'ok') {
+    els.toast.textContent = text;
+    els.toast.classList.toggle('error', tone === 'error');
+    els.toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => els.toast.classList.remove('show'), 2600);
+  }
+
+  /* ============================================================
+     WebHID transport
+     ============================================================ */
+  const hasVendorCollection = (device) =>
+    !!device && Array.isArray(device.collections) &&
+    device.collections.some(c => c.usagePage === 0x008c && c.usage === 0x0001);
+
+  function onInputReport(event) {
+    const view = event.data;
+    const data = new Uint8Array(view.buffer, view.byteOffset, view.byteLength);
+    for (const fn of [...reportListeners]) {
+      try { fn(data); } catch (err) { /* a listener owns its own error path */ }
+    }
+  }
+
+  function waitForReports({ done, onReport, timeoutMs }) {
+    return new Promise((resolve, reject) => {
+      let finished = false;
+      const handler = (data) => {
+        if (finished) return;
+        let isDone = false;
+        try { isDone = done(data); } catch (err) {
+          finished = true; clearTimeout(timer); reportListeners.delete(handler); reject(err); return;
+        }
+        if (isDone) {
+          finished = true; clearTimeout(timer); reportListeners.delete(handler); resolve();
+          return;
+        }
+        try { onReport && onReport(data); } catch (err) {
+          finished = true; clearTimeout(timer); reportListeners.delete(handler); reject(err);
+        }
+      };
+      const timer = setTimeout(() => {
+        if (finished) return;
+        finished = true;
+        reportListeners.delete(handler);
+        reject(new Error('等待键盘响应超时'));
+      }, timeoutMs);
+      reportListeners.add(handler);
+    });
+  }
+
+  async function send(cmd, payload = []) {
+    if (!S.device || !S.connected) throw new Error('键盘未连接');
+    const body = new Uint8Array(64);
+    body[0] = (cmd >> 8) & 0xff;
+    body[1] = cmd & 0xff;
+    const len = Math.min(payload.length, 62);
+    for (let i = 0; i < len; i++) body[2 + i] = payload[i] & 0xff;
+    await S.device.sendReport(0, body);
+  }
+
+  function decodeAscii(data, start) {
+    let out = '';
+    for (let i = start; i < data.length; i++) {
+      const c = data[i];
+      if (!c) break;
+      if (c >= 32 && c < 127) out += String.fromCharCode(c);
+    }
+    return out.trim();
+  }
+
+  async function readVersion() {
+    let version = '';
+    const waiter = waitForReports({
+      timeoutMs: 1600,
+      done: (data) => {
+        if (data.length < 3 || data[1] !== 0xf9) return false;
+        version = decodeAscii(data, 2);
+        return true;
+      }
+    });
+    try {
+      await send(CMD.VERSION);
+    } catch (err) {
+      await waiter.catch(() => {});
+      throw err;
+    }
+    await waiter;
+    if (!version) throw new Error('键盘没有返回固件版本');
+    return version;
+  }
+
+  async function readAllRows() {
+    const rows = [];
+    let rowCount = 0;
+    const waiter = waitForReports({
+      timeoutMs: 22000,
+      done: (data) => data[0] === 0xf6 && rowCount >= S.keycount,
+      onReport: (data) => {
+        if (data[1] !== 0xf0) return;
+        const level = data[2], key = data[3], hw = data[6];
+        if (level >= 1 && key >= 1) {
+          rows.push({ level, key, hw });
+          rowCount++;
+          setProgress(rowCount, S.keycount * 2, '读取键位');
+        }
+      }
+    });
+    try {
+      await send(CMD.READ_ALL);
+    } catch (err) {
+      await waiter.catch(() => {});
+      throw err;
+    }
+    await waiter;
+    return rows;
+  }
+
+  function validateRows(rows, keycount) {
+    if (!rows.length) throw new Error('键盘没有返回任何键位');
+    const levels = [...new Set(rows.map(r => r.level))].sort((a, b) => a - b);
+    for (const level of levels) {
+      const seen = new Set(rows.filter(r => r.level === level).map(r => r.key));
+      if (seen.size !== keycount) {
+        throw new Error(`第 ${level} 层只读到 ${seen.size}/${keycount} 个键，请重试`);
+      }
+      for (let key = 1; key <= keycount; key++) {
+        if (!seen.has(key)) throw new Error(`第 ${level} 层缺少键位 ${key}，请重试`);
+      }
+    }
+    S.layers = levels;
+  }
+
+  async function attachDevice(device) {
+    if (!device) return;
+    if (!hasVendorCollection(device)) {
+      showNotice('选中的接口不是键盘的配置接口。请重新连接，选择 75EC-XRGB 的配置接口。', 'error');
+      return;
+    }
+    if (S.device && S.device !== device) {
+      try { await S.device.close(); } catch (err) { /* ignore */ }
+    }
+    S.device = device;
+    S.demo = false;
+    S.hidFailed = false;
+    device.addEventListener('inputreport', onInputReport);
+    try {
+      await device.open();
+    } catch (err) {
+      S.device = null;
+      throw new Error(`无法打开键盘：${err.message}`);
+    }
+    S.connected = true;
+    renderConnection();
+    log('键盘已连接');
+    toast('键盘已连接');
+    try {
+      await readFromDevice({ silent: true });
+    } catch (err) {
+      // readFromDevice shows its own notice; keep the connection alive.
+    }
+  }
+
+  async function connectWithFilter(filter) {
+    if (!navigator.hid) {
+      showNotice('这个浏览器不支持 WebHID。请用 Chrome 或 Edge 打开本页。', 'error');
+      return;
+    }
+    setBusy(true);
+    hideNotice();
+    try {
+      const devices = await navigator.hid.requestDevice({ filters: [filter] });
+      const device = devices && devices[0];
+      if (!device) return;
+      if (!hasVendorCollection(device)) {
+        showNotice('这个接口没有配置端点。请重新连接，选择 75EC-XRGB 的配置接口（不是键盘输入接口）。', 'error');
+        return;
+      }
+      await attachDevice(device);
+    } catch (err) {
+      if (err.name === 'NotFoundError') {
+        S.hidFailed = true;
+        showNotice('没有找到 75EC-XRGB 的配置接口。请确认键盘已插好，或点右上角「用 VID/PID 重试」。', 'error');
+      } else if (err.name === 'SecurityError' || err.name === 'NotAllowedError') {
+        showNotice('浏览器拒绝了 HID 访问。请允许本站访问 HID 设备；若仍失败，请用 start.command 通过 localhost 打开。', 'error');
+      } else {
+        showNotice(`连接失败：${err.message}`, 'error');
+      }
+      renderConnection();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function autoConnect() {
+    if (!navigator.hid) return;
+    try {
+      const devices = await navigator.hid.getDevices();
+      const device = devices.find(hasVendorCollection);
+      if (device) await attachDevice(device);
+    } catch (err) {
+      // Silent: the user can still click connect.
+    }
+  }
+
+  async function disconnect() {
+    if (!S.device) return;
+    try { await S.device.close(); } catch (err) { /* ignore */ }
+    try { S.device.removeEventListener('inputreport', onInputReport); } catch (err) { /* ignore */ }
+    S.device = null;
+    S.connected = false;
+    renderConnection();
+    updateButtons();
+    log('键盘已断开');
+    toast('键盘已断开');
+  }
+
+  /* ============================================================
+     Local bridge transport (Node + node-hid)
+     ============================================================ */
+  const BRIDGE = window.NIZ_BRIDGE && window.NIZ_BRIDGE.token ? window.NIZ_BRIDGE : null;
+  if (BRIDGE) {
+    const label = document.getElementById('transportLabel');
+    if (label) label.textContent = '本地桥接 · node-hid';
+  }
+
+  async function bridgeRequest(path, body) {
+    if (!BRIDGE) throw new Error('本地桥接没有启动');
+    const res = await fetch(path, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-bridge-token': BRIDGE.token
+      },
+      body: JSON.stringify(body || {})
+    });
+    let data = null;
+    try { data = await res.json(); } catch (err) { /* handled below */ }
+    if (!res.ok || !data || data.ok === false) {
+      const error = new Error((data && data.error) || `本地桥接返回 ${res.status}`);
+      error.code = data && data.code;
+      error.rows = data && data.rows;
+      throw error;
+    }
+    return data;
+  }
+
+  function applyReadResult(version, keycount, rows) {
+    validateRows(rows, keycount);
+    S.version = version;
+    S.keycount = keycount;
+    S.baseline = cloneRows(rows);
+    S.mapping = cloneRows(rows);
+    rebuildIndexes();
+    if (!S.selected || !rows.some(r => r.key === S.selected)) S.selected = 1;
+    if (!S.layers.includes(S.layer)) S.layer = S.layers[0] || 1;
+    renderAll();
+  }
+
+  async function readFromBridge({ silent = false } = {}) {
+    if (S.busy) return;
+    setBusy(true);
+    hideNotice();
+    try {
+      setProgress(0, 0, '读取键位');
+      log('通过本地桥接读取键盘');
+      const data = await bridgeRequest('/api/read', {});
+      S.connected = true;
+      S.demo = false;
+      applyReadResult(data.version, data.keycount, data.rows);
+      renderConnection();
+      updateButtons();
+      log(`读取 ${data.rows.length} 条键位 · ${S.layers.length} 层`);
+      if (!silent) toast('已读取键盘配置');
+    } catch (err) {
+      S.connected = false;
+      renderConnection();
+      updateButtons();
+      showNotice(`读取失败：${err.message}`, 'error');
+      log(`读取失败：${err.message}`, 'error');
+    } finally {
+      setBusy(false);
+      hideProgress();
+    }
+  }
+
+  async function writeToBridge() {
+    const list = changes();
+    if (!list.length) {
+      toast('没有需要写入的修改');
+      return;
+    }
+    const confirmed = await openWriteModal(list);
+    if (!confirmed) return;
+
+    setBusy(true);
+    hideNotice();
+    try {
+      log('通过本地桥接写入，先核对键盘上的当前配置');
+      setProgress(0, 0, '写入键位');
+      const data = await bridgeRequest('/api/write', {
+        rows: orderedRows(S.mapping),
+        baseline: orderedRows(S.baseline)
+      });
+      S.version = data.version;
+      S.keycount = data.keycount;
+      S.baseline = cloneRows(data.rows);
+      S.mapping = cloneRows(data.rows);
+      rebuildIndexes();
+      S.connected = true;
+      renderAll();
+      log('写入成功，读回校验通过');
+      toast('写入成功，键盘已更新');
+    } catch (err) {
+      showNotice(`写入失败：${err.message}`, 'error');
+      log(`写入失败：${err.message}`, 'error');
+    } finally {
+      setBusy(false);
+      hideProgress();
+    }
+  }
+
+  async function bridgeBoot() {
+    S.transport = 'bridge';
+    S.demo = false;
+    log('本地桥接模式');
+    renderConnection();
+    updateButtons();
+    await readFromBridge({ silent: true });
+  }
+
+  /* ============================================================
+     Read / write
+     ============================================================ */
+  async function readFromDevice({ silent = false } = {}) {
+    if (S.transport === 'bridge') {
+      await readFromBridge({ silent });
+      return;
+    }
+    if (!S.connected || S.busy) return;
+    setBusy(true);
+    hideNotice();
+    try {
+      setProgress(0, 0, '读取版本');
+      log('请求固件版本');
+      const version = await readVersion();
+      const keycount = parseInt(version, 10);
+      if (!Number.isFinite(keycount) || keycount <= 0 || keycount > 200) {
+        throw new Error(`无法识别键盘版本：${version || '空响应'}`);
+      }
+      S.version = version;
+      S.keycount = keycount;
+      log(`固件 ${version} · ${keycount} 键`);
+      setProgress(0, keycount * 2, '读取键位');
+      const rows = await readAllRows();
+      applyReadResult(version, keycount, rows);
+      log(`读取 ${rows.length} 条键位 · ${S.layers.length} 层`);
+      if (!silent) toast('已读取键盘配置');
+    } catch (err) {
+      showNotice(`读取失败：${err.message}`, 'error');
+      log(`读取失败：${err.message}`, 'error');
+      throw err;
+    } finally {
+      setBusy(false);
+      hideProgress();
+    }
+  }
+
+  async function writeAll(rows) {
+    const ordered = orderedRows(rows);
+    await send(CMD.WRITE_ALL);
+    await sleep(20);
+    for (let i = 0; i < ordered.length; i++) {
+      const r = ordered[i];
+      await send(CMD.KEY_DATA, [r.level, r.key, 0, r.hw ? 1 : 0, r.hw]);
+      setProgress(i + 1, ordered.length, '写入键位');
+      if ((i + 1) % 10 === 0) await sleep(4);
+    }
+    await send(CMD.DATA_END, new Array(62).fill(0xf6));
+  }
+
+  async function writeToDevice() {
+    if (S.busy) return;
+    if (S.transport === 'bridge') {
+      await writeToBridge();
+      return;
+    }
+    if (!S.connected) return;
+    const list = changes();
+    if (!list.length) {
+      toast('没有需要写入的修改');
+      return;
+    }
+    const confirmed = await openWriteModal(list);
+    if (!confirmed) return;
+
+    setBusy(true);
+    hideNotice();
+    try {
+      log('写入前重新读取，确认配置未变化');
+      const current = await readAllRows();
+      if (!sameRows(current, S.baseline)) {
+        throw new Error('键盘上的配置已变化（可能切换了模式或重新改过键）。请重新读取后再写入。');
+      }
+      const ordered = orderedRows(S.mapping);
+      log(`开始写入 ${ordered.length} 条键位`);
+      setProgress(0, ordered.length, '写入键位');
+      await writeAll(ordered);
+      setProgress(ordered.length, ordered.length, '校验写入');
+      await sleep(700);
+      const back = await readAllRows();
+      if (!sameRows(back, S.mapping)) {
+        throw new Error('写入后读回的内容与预期不一致。请重新读取并重试；写入前的备份已下载。');
+      }
+      S.baseline = cloneRows(back);
+      S.mapping = cloneRows(back);
+      rebuildIndexes();
+      log('写入成功，读回校验通过');
+      renderAll();
+      toast('写入成功，键盘已更新');
+    } catch (err) {
+      showNotice(`写入失败：${err.message}`, 'error');
+      log(`写入失败：${err.message}`, 'error');
+    } finally {
+      setBusy(false);
+      hideProgress();
+    }
+  }
+
+  /* ============================================================
+     Modal
+     ============================================================ */
+  let modalResolve = null;
+
+  function closeModal(result) {
+    els.modalBackdrop.classList.add('hidden');
+    const resolve = modalResolve;
+    modalResolve = null;
+    if (resolve) resolve(result);
+  }
+
+  function openWriteModal(list) {
+    els.modalChanges.textContent = '';
+    list.slice(0, 12).forEach(ch => {
+      const li = document.createElement('li');
+      const from = ch.from === 0 ? '无功能' : keyInfo(ch.from).name;
+      const to = ch.to === 0 ? '无功能' : keyInfo(ch.to).name;
+      const head = document.createElement('span');
+      head.textContent = `${layerName(ch.level)} · 键 ${ch.key} ${PHYS[ch.key] || ''}：`;
+      const f = document.createElement('span');
+      f.className = 'from';
+      f.textContent = from;
+      const arrow = document.createTextNode(' → ');
+      const t = document.createElement('span');
+      t.className = 'to';
+      t.textContent = to;
+      li.append(head, f, arrow, t);
+      els.modalChanges.appendChild(li);
+    });
+    if (list.length > 12) {
+      const li = document.createElement('li');
+      li.textContent = `还有 ${list.length - 12} 处修改…`;
+      els.modalChanges.appendChild(li);
+    }
+    $('#modalText').textContent = `将把 ${list.length} 处修改写入键盘。写入后会重新读取并逐键校验。`;
+    els.modalBackdrop.classList.remove('hidden');
+    setTimeout(() => els.modalCancel.focus(), 30);
+    return new Promise(resolve => { modalResolve = resolve; });
+  }
+
+  els.modalCancel.addEventListener('click', () => closeModal(false));
+  els.modalConfirm.addEventListener('click', () => {
+    downloadBackup('before-write', S.baseline);
+    try {
+      localStorage.setItem('niz75ec.preWriteBackup', JSON.stringify(backupPayload(S.baseline, 'pre-write')));
+    } catch (err) { /* download is the primary backup */ }
+    log('已下载写入前备份');
+    closeModal(true);
+  });
+  els.modalBackdrop.addEventListener('click', (e) => {
+    if (e.target === els.modalBackdrop) closeModal(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !els.modalBackdrop.classList.contains('hidden')) closeModal(false);
+  });
+
+  /* ============================================================
+     Backup / import
+     ============================================================ */
+  function stamp() {
+    const d = new Date();
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  }
+
+  function backupPayload(rows, kind) {
+    return {
+      app: 'niz-75ec-editor',
+      format: 1,
+      kind: kind || 'manual',
+      savedAt: new Date().toISOString(),
+      device: { product: '75EC-XRGB', vendorId: 0x0483, productId: 0x5026 },
+      firmware: S.version || '',
+      keycount: S.keycount || 75,
+      layers: S.layers.length ? S.layers : [1, 2],
+      rows: rows.map(r => ({ level: r.level, key: r.key, hw: r.hw }))
+    };
+  }
+
+  function downloadBackup(kind = 'manual', rows = S.mapping) {
+    if (!rows.length) return;
+    const payload = backupPayload(rows, kind);
+    const blob = new Blob([JSON.stringify(payload, null, 2) + '\n'], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `niz-75ec-${kind}-${stamp()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  function parseBackup(data) {
+    const rows = Array.isArray(data) ? data : data && data.rows;
+    if (!Array.isArray(rows) || !rows.length) throw new Error('备份里没有 rows 数组');
+    const clean = rows.map(r => ({ level: Number(r.level), key: Number(r.key), hw: Number(r.hw) }));
+    for (const r of clean) {
+      if (!Number.isInteger(r.level) || r.level < 1) throw new Error('备份里有非法的层号');
+      if (!Number.isInteger(r.key) || r.key < 1) throw new Error('备份里有非法的键号');
+      if (!Number.isInteger(r.hw) || r.hw < 0 || r.hw > 255) throw new Error('备份里有非法的键码');
+    }
+    const seen = new Set();
+    for (const r of clean) {
+      const k = rowKey(r.level, r.key);
+      if (seen.has(k)) throw new Error('备份里有重复键位');
+      seen.add(k);
+    }
+    return clean;
+  }
+
+  async function importBackupFile(file) {
+    try {
+      const text = await file.text();
+      let data;
+      try { data = JSON.parse(text); } catch (err) { throw new Error('不是有效的 JSON 文件'); }
+      const rows = parseBackup(data);
+      if (!S.mapping.length) {
+        S.baseline = cloneRows(rows);
+        S.mapping = cloneRows(rows);
+        S.keycount = Math.max(...rows.map(r => r.key));
+        S.layers = [...new Set(rows.map(r => r.level))].sort((a, b) => a - b);
+        S.layer = S.layers[0] || 1;
+        S.selected = rows[0].key;
+        rebuildIndexes();
+        renderAll();
+        showNotice('已载入备份。连接键盘并读取后，才能把这份配置写回去。', 'info');
+        return;
+      }
+      if (S.connected && S.keycount && Math.max(...rows.map(r => r.key)) !== S.keycount) {
+        throw new Error(`备份有 ${Math.max(...rows.map(r => r.key))} 个键，当前键盘是 ${S.keycount} 个键`);
+      }
+      if (S.connected) {
+        const wantLevels = [...new Set(rows.map(r => r.level))].sort((a, b) => a - b);
+        if (JSON.stringify(wantLevels) !== JSON.stringify(S.layers)) {
+          throw new Error('备份的层数与当前键盘不一致');
+        }
+        for (const level of wantLevels) {
+          const count = rows.filter(r => r.level === level).length;
+          if (count !== S.keycount) throw new Error(`备份的第 ${level} 层键数不完整`);
+        }
+      }
+      S.mapping = cloneRows(rows);
+      rebuildIndexes();
+      if (!S.selected) S.selected = rows[0].key;
+      if (!S.layers.includes(S.layer)) S.layer = S.layers[0] || 1;
+      renderAll();
+      const n = changes().length;
+      toast(`已导入备份 · ${n} 处与当前配置不同`);
+      showNotice(`已导入备份。${n ? `有 ${n} 处与键盘当前配置不同，点「写入键盘」恢复。` : '与键盘当前配置一致。'}`, 'info');
+    } catch (err) {
+      showNotice(`导入失败：${err.message}`, 'error');
+    } finally {
+      els.fileInput.value = '';
+    }
+  }
+
+  /* ============================================================
+     Demo
+     ============================================================ */
+  function loadDemo() {
+    const rows = DEMO_ROWS.map(([level, key, hw]) => ({ level, key, hw }));
+    S.demo = true;
+    S.version = '75EC(XRGB);V1.2.16;V1.3;';
+    S.keycount = 75;
+    S.layers = [1, 2];
+    S.layer = 1;
+    S.selected = 67;
+    S.baseline = cloneRows(rows);
+    S.mapping = cloneRows(rows);
+    rebuildIndexes();
+    renderAll();
+    showNotice('演示数据：未连接键盘，写入不可用。点击「连接键盘」可读取真实配置。', 'info');
+  }
+
+  /* ============================================================
+     Wiring
+     ============================================================ */
+  function wire() {
+    const connect = () => {
+      if (S.transport === 'bridge') readFromBridge();
+      else connectWithFilter(FILTER);
+    };
+    els.connectBtn.addEventListener('click', connect);
+    els.overlayConnect.addEventListener('click', connect);
+    els.fallbackBtn.addEventListener('click', () => connectWithFilter(BROAD_FILTER));
+    els.disconnectBtn.addEventListener('click', disconnect);
+
+    els.readBtn.addEventListener('click', () => readFromDevice());
+    els.writeBtn.addEventListener('click', writeToDevice);
+
+    els.undoBtn.addEventListener('click', () => {
+      if (!S.mapping.length) return;
+      S.mapping = cloneRows(S.baseline);
+      rebuildIndexes();
+      renderAll();
+      log('已撤销所有未写入修改');
+    });
+
+    els.exportBtn.addEventListener('click', () => {
+      if (!S.mapping.length) return;
+      downloadBackup('current', S.mapping);
+      log('已导出当前配置');
+      toast('已导出当前配置');
+    });
+
+    els.importBtn.addEventListener('click', () => els.fileInput.click());
+    els.fileInput.addEventListener('change', () => {
+      const file = els.fileInput.files && els.fileInput.files[0];
+      if (file) importBackupFile(file);
+    });
+
+    els.noticeClose.addEventListener('click', hideNotice);
+
+    els.searchInput.addEventListener('input', renderOptions);
+    els.rawApply.addEventListener('click', () => {
+      const n = Number(els.rawInput.value);
+      if (!Number.isInteger(n) || n < 0 || n > 255) {
+        showNotice('原始键码必须是 0–255 的整数。', 'error');
+        return;
+      }
+      assignCode(n);
+      els.rawInput.value = '';
+    });
+    els.rawInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') els.rawApply.click();
+    });
+
+    els.revertKeyBtn.addEventListener('click', () => {
+      if (S.selected == null || !S.mapping.length) return;
+      for (const level of S.layers.length ? S.layers : [1, 2]) {
+        const base = S.baseIndex.get(rowKey(level, S.selected));
+        setHw(level, S.selected, base ? base.hw : 0);
+      }
+      renderAll();
+      log(`已恢复键位 ${S.selected} 的读取值`);
+    });
+
+    els.rshiftRestore.addEventListener('click', () => {
+      setHw(1, 67, 66);
+      renderDeck();
+      renderAssignCards();
+      renderChangeSummary();
+      updateButtons();
+      els.rshiftHint.classList.add('hidden');
+      log('键位 67 普通层已改回右 Shift（尚未写入）');
+    });
+
+    navigator.hid && navigator.hid.addEventListener('disconnect', (event) => {
+      if (S.device && event.device === S.device) {
+        S.device = null;
+        S.connected = false;
+        renderConnection();
+        updateButtons();
+        log('键盘已断开', 'error');
+        showNotice('键盘已断开。重新插好后点「连接键盘」即可。', 'error');
+      }
+    });
+
+    window.addEventListener('resize', fitDeck);
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(fitDeck).observe(els.deckPlate);
+    }
+  }
+
+  /* ============================================================
+     Boot
+     ============================================================ */
+  buildDeck();
+  renderCats();
+  wire();
+  renderAll();
+
+  if (location.protocol === 'file:') {
+    showNotice('正在用 file:// 打开。请双击 start.command 通过本地桥接打开：Chrome 不允许网页直接访问带键盘功能的 HID 设备。', 'info');
+  }
+
+  const params = new URLSearchParams(location.search);
+  if (params.has('demo')) {
+    loadDemo();
+  } else if (BRIDGE) {
+    bridgeBoot();
+  } else if (!navigator.hid) {
+    showNotice('这个浏览器不支持 WebHID。请用 Chrome 或 Edge，并通过 start.command 打开本页。', 'error');
+  } else {
+    autoConnect();
+  }
+})();
+</script>
+</body>
+</html>
